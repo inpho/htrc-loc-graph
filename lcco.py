@@ -38,8 +38,9 @@ def get_closest(lcc):
         cur_uri = LCCO_URI + parsed.cls
     else:
         cur_uri = LCCO_URI + 'E-F'
+
     next_uri = [narrow for narrow, obj in loader[cur_uri].narrower.iteritems()
-                    if in_range(lcc,str(obj.notation))]
+                    if in_range(lcc, str(obj.notation))]
 
     while next_uri:
         cur_uri = next_uri[0]
@@ -64,6 +65,8 @@ def in_range(lcc, candidate):
             return True
         return False
     elif candidate.subcls and lcc.subcls != candidate.subcls:
+        return False
+    elif not candidate.subcls and candidate.topic and lcc.subcls:
         return False
     elif candidate.topic:
         if not lcc.topic:
@@ -96,6 +99,18 @@ def in_range(lcc, candidate):
     else:
         return True
 
+def get_cats(cat):
+    #closest = get_closest(sys.argv[-1])
+    cats = []
+    cats.append(cat)
+    closest = get_closest(cat)
+    while closest:
+        if closest != cat:
+            cats.append(closest)
+        closest = get_next(closest)
+
+    return cats
+
 if __name__ == '__main__':
     assert in_range("LB", "L") == True
     assert in_range("L", "LB") == False
@@ -103,9 +118,4 @@ if __name__ == '__main__':
     assert get_closest("LB1138") == "LB1101-1139"
     assert get_next("LB1138") == "LB5-3640"
 
-    closest = get_closest(sys.argv[-1])
-    if closest == sys.argv[-1]:
-        print get_next(closest)
-    else:
-        print closest
-
+    print ",".join(get_cats(sys.argv[-1]))
